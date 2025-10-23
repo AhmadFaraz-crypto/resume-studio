@@ -1,0 +1,36 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Square background -->
+  <rect x="0" y="0" width="200" height="200" rx="20" fill="url(#background)"/>
+  
+  <!-- Creative geometric design -->
+  <polygon points="50,40 90,40 85,80 45,80" fill="url(#gradient1)"/>
+  <polygon points="45,80 85,80 80,120 40,120" fill="url(#gradient2)"/>
+  
+  <!-- Creative document icon -->
+  <rect x="35" y="50" width="40" height="50" rx="4" fill="white" opacity="0.9"/>
+  <path d="M45 60h30M45 70h35M45 80h20M45 90h30" stroke="#3B82F6" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Text -->
+  <text x="100" y="130" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="white" text-anchor="middle">Resume</text>
+  <text x="100" y="155" font-family="Arial, sans-serif" font-size="24" font-weight="800" fill="#8B5CF6" text-anchor="middle">Studio</text>
+  
+  <!-- Creative accent dots -->
+  <circle cx="160" cy="50" r="6" fill="#3B82F6"/>
+  <circle cx="150" cy="80" r="4" fill="#8B5CF6"/>
+  <circle cx="165" cy="110" r="5" fill="#06B6D4"/>
+  
+  <defs>
+    <linearGradient id="background" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E40AF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

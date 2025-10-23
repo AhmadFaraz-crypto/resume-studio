@@ -1,0 +1,11 @@
+export { default as CVTemplate } from './CVTemplate';
+export { default as CVTemplate2 } from './CVTemplate2';
+export { default as CVTemplate3 } from './CVTemplate3';
+export { default as CVTemplate4 } from './CVTemplate4';
+export { default as CVTemplate5 } from './CVTemplate5';
+export { default as CVTemplate6 } from './CVTemplate6';
+export { default as CVTemplate7 } from './CVTemplate7';
+export { default as CVTemplate8 } from './CVTemplate8';
+export { default as CVTemplate9 } from './CVTemplate9';
+export { default as CVTemplate10 } from './CVTemplate10';
+export { default as CVTemplate11 } from './CVTemplate11';

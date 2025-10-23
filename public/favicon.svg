@@ -1,0 +1,25 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Creative geometric design - scaled for favicon -->
+  <polygon points="4,2 8,2 7,6 3,6" fill="url(#gradient1)"/>
+  <polygon points="3,6 7,6 6,10 2,10" fill="url(#gradient2)"/>
+  
+  <!-- Creative document icon -->
+  <rect x="2" y="4" width="4" height="6" rx="0.5" fill="white" opacity="0.9"/>
+  <path d="M3 5h3M3 6h4M3 7h2M3 8h4" stroke="#3B82F6" stroke-width="0.3" stroke-linecap="round"/>
+  
+  <!-- Creative accent dots -->
+  <circle cx="28" cy="4" r="1" fill="#3B82F6"/>
+  <circle cx="26" cy="8" r="0.8" fill="#8B5CF6"/>
+  <circle cx="29" cy="12" r="1.2" fill="#06B6D4"/>
+  
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>
