@@ -4,6 +4,7 @@ import { Layout } from '../components/layout';
 import { Button, Input } from '../components/common';
 import { signUpWithEmail, signInWithGoogle, signInWithTwitter } from '../services/authService';
 import { useErrorHandler } from '../hooks/useErrorHandler';
+import { getDraftResume, saveDraftAsResume } from '../services/draftService';
 
 const SignupPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +17,7 @@ const SignupPage: React.FC = () => {
   const [error, setError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
-  const { handleAuthError, handleSignupSuccess } = useErrorHandler();
+  const { handleAuthError, handleSignupSuccess, handleDraftSaved, handleResumeError } = useErrorHandler();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -56,6 +57,18 @@ const SignupPage: React.FC = () => {
       // Enhanced authentication with token management
       await signUpWithEmail(formData.email, formData.password, formData.name);
       
+      // Check if there's a draft resume to save
+      const draftResume = getDraftResume();
+      if (draftResume) {
+        try {
+          await saveDraftAsResume(draftResume.cvData, draftResume.templateId);
+          handleDraftSaved(); // Show success toast
+        } catch (error) {
+          // Show error but don't block navigation
+          handleResumeError(error);
+        }
+      }
+      
       handleSignupSuccess();
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -71,6 +84,19 @@ const SignupPage: React.FC = () => {
 
     try {
       await signInWithGoogle();
+      
+      // Check if there's a draft resume to save
+      const draftResume = getDraftResume();
+      if (draftResume) {
+        try {
+          await saveDraftAsResume(draftResume.cvData, draftResume.templateId);
+          handleDraftSaved(); // Show success toast
+        } catch (error) {
+          // Show error but don't block navigation
+          handleResumeError(error);
+        }
+      }
+      
       handleSignupSuccess();
       navigate('/dashboard');
     } catch (err: unknown) {
@@ -86,6 +112,19 @@ const SignupPage: React.FC = () => {
 
     try {
       await signInWithTwitter();
+      
+      // Check if there's a draft resume to save
+      const draftResume = getDraftResume();
+      if (draftResume) {
+        try {
+          await saveDraftAsResume(draftResume.cvData, draftResume.templateId);
+          handleDraftSaved(); // Show success toast
+        } catch (error) {
+          // Show error but don't block navigation
+          handleResumeError(error);
+        }
+      }
+      
       handleSignupSuccess();
       navigate('/dashboard');
     } catch (err: unknown) {
