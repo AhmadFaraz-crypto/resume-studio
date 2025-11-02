@@ -83,8 +83,8 @@ Before you begin, ensure you have:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/cv-templates.git
-cd cv-templates
+git clone https://github.com/AhmadFaraz-crypto/resume-studio.git
+cd resume-studio
 ```
 
 ### 2. Install Dependencies
@@ -277,7 +277,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Ahmad Faraz**
 
-- GitHub: [@ahmadfaraz](https://github.com/ahmadfaraz)
+- GitHub: [@AhmadFaraz-crypto](https://github.com/AhmadFaraz-crypto)
 
 ## 🌟 Show Your Support
 
