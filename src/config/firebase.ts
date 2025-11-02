@@ -1,105 +1,91 @@
 // Firebase services
-import { initializeApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
-import { getStorage, connectStorageEmulator } from 'firebase/storage';
+import { initializeApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
+import { getFirestore, connectFirestoreEmulator, type Firestore } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage';
 
-// Validate Firebase environment variables
-const requiredEnvVars = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+// Check if Firebase is configured
+const isFirebaseConfigured = (): boolean => {
+  const requiredVars = [
+    import.meta.env.VITE_FIREBASE_API_KEY,
+    import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    import.meta.env.VITE_FIREBASE_APP_ID
+  ];
+  
+  return requiredVars.every(v => v && typeof v === 'string' && v.trim() !== '');
 };
 
-// Check if all required environment variables are present
-const envVarNames: Record<string, string> = {
-  apiKey: 'VITE_FIREBASE_API_KEY',
-  authDomain: 'VITE_FIREBASE_AUTH_DOMAIN',
-  projectId: 'VITE_FIREBASE_PROJECT_ID',
-  storageBucket: 'VITE_FIREBASE_STORAGE_BUCKET',
-  messagingSenderId: 'VITE_FIREBASE_MESSAGING_SENDER_ID',
-  appId: 'VITE_FIREBASE_APP_ID'
-};
+// Export Firebase availability flag
+export const isFirebaseAvailable = isFirebaseConfigured();
 
-const missingVars = Object.entries(requiredEnvVars)
-  .filter(([, value]) => !value || (typeof value === 'string' && value.trim() === ''))
-  .map(([key]) => envVarNames[key]);
+// Initialize Firebase only if configured
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
+let storage: FirebaseStorage | null = null;
 
-if (missingVars.length > 0) {
-  const errorMessage = `
-🚨 Firebase Configuration Error
+if (isFirebaseAvailable) {
+  try {
+    // Firebase configuration from environment variables
+    const firebaseConfig = {
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID
+    };
 
-Missing required environment variables:
-${missingVars.map(v => `  - ${v}`).join('\n')}
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    storage = getStorage(app);
+  } catch (error) {
+    console.error('Failed to initialize Firebase:', error);
+    // Reset all to null if initialization fails
+    app = null;
+    auth = null;
+    db = null;
+    storage = null;
+  }
+} else {
+  // Log a friendly message in development
+  if (import.meta.env.DEV) {
+    console.warn(`
+⚠️ Firebase is not configured. The app will run in demo mode.
+Features like authentication and data persistence are disabled.
 
-Please set these environment variables in your deployment platform (Netlify, Vercel, etc.).
-
-For Netlify:
-1. Go to Site settings > Environment variables
-2. Add each variable with the "VITE_" prefix
-3. Redeploy your site
-
-For local development:
+To enable Firebase features:
 1. Copy env.example to .env.local
 2. Fill in your Firebase configuration values
+3. Restart the development server
 
 See README.md for detailed setup instructions.
-  `.trim();
-
-  console.error(errorMessage);
-  
-  // In development, throw error to make it obvious
-  if (import.meta.env.DEV) {
-    throw new Error('Firebase configuration is missing. Please check your environment variables.');
+    `.trim());
   }
 }
 
-// Firebase configuration from environment variables
-export const firebaseConfig = {
-  apiKey: requiredEnvVars.apiKey || '',
-  authDomain: requiredEnvVars.authDomain || '',
-  projectId: requiredEnvVars.projectId || '',
-  storageBucket: requiredEnvVars.storageBucket || '',
-  messagingSenderId: requiredEnvVars.messagingSenderId || '',
-  appId: requiredEnvVars.appId || ''
-};
-
-// Initialize Firebase only if we have valid configuration
-let app;
-try {
-  app = initializeApp(firebaseConfig);
-} catch (error) {
-  console.error('Failed to initialize Firebase:', error);
-  // In production, we might want to show a user-friendly error message
-  if (!import.meta.env.DEV) {
-    console.error('Firebase initialization failed. Please check your environment variables.');
-  }
-  throw error;
-}
-
-// Initialize Firebase services
-export const auth = getAuth(app);
-export const db = getFirestore(app);
-export const storage = getStorage(app);
+// Export Firebase services (may be null if not configured)
+export { auth, db, storage };
 
 // Connect to Firebase emulators in development
-if (import.meta.env.DEV && import.meta.env.VITE_FIREBASE_USE_EMULATOR === 'true') {
+if (isFirebaseAvailable && import.meta.env.DEV && import.meta.env.VITE_FIREBASE_USE_EMULATOR === 'true') {
   try {
     // Connect to Auth emulator
-    if (import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL) {
+    if (auth && import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL) {
       connectAuthEmulator(auth, import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL);
     }
     
     // Connect to Firestore emulator
-    if (import.meta.env.VITE_FIREBASE_FIRESTORE_EMULATOR_URL) {
+    if (db && import.meta.env.VITE_FIREBASE_FIRESTORE_EMULATOR_URL) {
       connectFirestoreEmulator(db, 'localhost', 8080);
     }
     
     // Connect to Storage emulator
-    if (import.meta.env.VITE_FIREBASE_STORAGE_EMULATOR_URL) {
+    if (storage && import.meta.env.VITE_FIREBASE_STORAGE_EMULATOR_URL) {
       connectStorageEmulator(storage, 'localhost', 9199);
     }
   } catch (error) {

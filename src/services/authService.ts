@@ -11,7 +11,7 @@ import {
   type User
 } from 'firebase/auth';
 import Cookies from 'js-cookie';
-import { auth } from '../config/firebase';
+import { auth, isFirebaseAvailable } from '../config/firebase';
 import { createUserProfile, getUserProfile, type UserProfile } from './userService';
 
 // Token management utilities
@@ -91,10 +91,18 @@ export const clearAuthToken = () => {
   }
 };
 
+// Helper function to check Firebase availability
+const checkFirebaseAvailability = () => {
+  if (!isFirebaseAvailable || !auth) {
+    throw new Error('Firebase authentication is not configured. Please configure Firebase environment variables to use authentication features.');
+  }
+};
+
 // Enhanced authentication functions
 export const signInWithEmail = async (email: string, password: string): Promise<UserProfile> => {
+  checkFirebaseAvailability();
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth!, email, password);
     const user = userCredential.user;
     
     // Get the ID token and refresh token
@@ -115,8 +123,9 @@ export const signInWithEmail = async (email: string, password: string): Promise<
 };
 
 export const signUpWithEmail = async (email: string, password: string, displayName: string): Promise<UserProfile> => {
+  checkFirebaseAvailability();
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth!, email, password);
     const user = userCredential.user;
     
     // Update user display name
@@ -140,9 +149,10 @@ export const signUpWithEmail = async (email: string, password: string, displayNa
 };
 
 export const signInWithGoogle = async (): Promise<UserProfile> => {
+  checkFirebaseAvailability();
   try {
     const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
+    const userCredential = await signInWithPopup(auth!, provider);
     const user = userCredential.user;
     
     // Get the ID token and refresh token
@@ -163,9 +173,10 @@ export const signInWithGoogle = async (): Promise<UserProfile> => {
 };
 
 export const signInWithTwitter = async (): Promise<UserProfile> => {
+  checkFirebaseAvailability();
   try {
     const provider = new TwitterAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
+    const userCredential = await signInWithPopup(auth!, provider);
     const user = userCredential.user;
     
     // Get the ID token and refresh token
@@ -186,6 +197,11 @@ export const signInWithTwitter = async (): Promise<UserProfile> => {
 };
 
 export const signOutUser = async (): Promise<void> => {
+  if (!isFirebaseAvailable || !auth) {
+    // If Firebase not available, just clear local tokens
+    clearAuthToken();
+    return;
+  }
   try {
     await signOut(auth);
     clearAuthToken();
@@ -206,6 +222,9 @@ export const signOutUser = async (): Promise<void> => {
 
 // Token refresh utility
 export const refreshAuthToken = async (): Promise<string | null> => {
+  if (!isFirebaseAvailable || !auth) {
+    return null;
+  }
   try {
     const user = auth.currentUser;
     if (user) {
@@ -262,6 +281,12 @@ export const ensureValidToken = async (): Promise<string | null> => {
 
 // Auth state listener with token management
 export const onAuthStateChange = (callback: (user: User | null, userProfile: UserProfile | null) => void) => {
+  if (!isFirebaseAvailable || !auth) {
+    // If Firebase not available, immediately call callback with null
+    callback(null, null);
+    // Return a no-op unsubscribe function
+    return () => {};
+  }
   return onAuthStateChanged(auth, async (user) => {
     if (user) {
       try {
@@ -289,11 +314,14 @@ export const onAuthStateChange = (callback: (user: User | null, userProfile: Use
 
 // Check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  return auth.currentUser !== null;
+  return isFirebaseAvailable && auth !== null && auth.currentUser !== null;
 };
 
 // Get current user
 export const getCurrentUser = (): User | null => {
+  if (!isFirebaseAvailable || !auth) {
+    return null;
+  }
   return auth.currentUser;
 };
 
