@@ -148,6 +148,11 @@ npm install
    - Choose "Start in test mode" (for development)
    - Select your preferred location
 
+4. **Add Authorized Domains** (for deployment):
+   - Go to Authentication > Settings
+   - Under "Authorized domains", add your deployment domain (e.g., `your-site.netlify.app`)
+   - This allows Firebase authentication to work on your deployed site
+
 > 💡 **Tip**: For detailed Firebase setup instructions, check out [FIREBASE_SETUP.md](./FIREBASE_SETUP.md)
 
 ### 4. Start the Development Server
@@ -239,6 +244,138 @@ All environment variables are prefixed with `VITE_` (required by Vite). See `env
 - **Templates**: Add new templates in `src/components/templates/`
 - **Default Data**: Modify `src/data/defaultCV.ts`
 - **Accent Colors**: Edit template definitions in `src/data/templates.ts`
+
+## 🚀 Deployment
+
+This application can be deployed on any platform that supports static site hosting. Popular options include Netlify, Vercel, GitHub Pages, and many others.
+
+### Build for Production
+
+First, build the application:
+
+```bash
+npm run build
+```
+
+This creates an optimized production build in the `dist` directory.
+
+### Environment Variables Setup
+
+**⚠️ Important**: Before deploying, you must set up Firebase environment variables in your hosting platform.
+
+#### Required Environment Variables
+
+You need to add these environment variables in your hosting platform's settings:
+
+```
+VITE_FIREBASE_API_KEY=your-api-key-here
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=your-app-id-here
+```
+
+### Platform-Specific Instructions
+
+#### Netlify
+
+1. **Connect your repository**:
+   - Go to [Netlify](https://www.netlify.com/)
+   - Click "Add new site" > "Import an existing project"
+   - Connect your GitHub/GitLab/Bitbucket repository
+
+2. **Configure build settings**:
+   - **Build command**: `npm run build`
+   - **Publish directory**: `dist`
+
+3. **Set environment variables**:
+   - Go to **Site settings** > **Environment variables**
+   - Click **Add variable**
+   - Add each Firebase environment variable (with `VITE_` prefix)
+   - Click **Save**
+
+4. **Deploy**:
+   - Netlify will automatically deploy on every push
+   - Or click **Trigger deploy** > **Deploy site**
+
+#### Vercel
+
+1. **Connect your repository**:
+   - Go to [Vercel](https://vercel.com/)
+   - Click "Import Project"
+   - Connect your repository
+
+2. **Configure project**:
+   - Framework Preset: **Vite**
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+
+3. **Set environment variables**:
+   - Go to **Settings** > **Environment Variables**
+   - Add each Firebase environment variable
+   - Select the environments (Production, Preview, Development)
+
+4. **Deploy**:
+   - Vercel will automatically deploy on every push
+
+#### GitHub Pages
+
+1. **Install GitHub Pages plugin**:
+   ```bash
+   npm install --save-dev vite-plugin-gh-pages
+   ```
+
+2. **Update `vite.config.ts`** (if needed for base path)
+
+3. **Set up GitHub Actions** or use a deployment script
+
+4. **Add environment variables**:
+   - Go to repository **Settings** > **Secrets and variables** > **Actions**
+   - Add each Firebase environment variable
+   - Note: You may need to use a GitHub Actions workflow for Vite env vars
+
+#### Other Platforms
+
+For other platforms (Cloudflare Pages, AWS Amplify, etc.):
+
+1. Set build command: `npm run build`
+2. Set output directory: `dist`
+3. Add all Firebase environment variables in the platform's environment variables section
+4. Ensure the platform supports environment variables with `VITE_` prefix (required by Vite)
+
+### Post-Deployment Checklist
+
+- ✅ All Firebase environment variables are set
+- ✅ Build command is configured correctly
+- ✅ Output directory is set to `dist`
+- ✅ Firebase Authentication domains include your deployed URL
+- ✅ Test authentication (sign up/login)
+- ✅ Test Firestore operations (saving/loading resumes)
+- ✅ Test file uploads (if using Storage)
+
+### Troubleshooting Deployment
+
+#### Error: `auth/invalid-api-key`
+
+This means Firebase environment variables are missing or incorrect. 
+
+1. Check your hosting platform's environment variables section
+2. Ensure all variables have the `VITE_` prefix
+3. Verify values match your Firebase Console configuration
+4. **Redeploy** after adding/changing environment variables
+
+#### Build Fails
+
+- Check that Node.js version is 16+ in your platform settings
+- Verify all dependencies are in `package.json`
+- Check build logs for specific errors
+
+#### App Works Locally but Not After Deployment
+
+- Environment variables are likely missing in the hosting platform
+- Check browser console for Firebase errors
+- Verify Firebase project allows your deployment domain
 
 ## 🤝 Contributing
 
