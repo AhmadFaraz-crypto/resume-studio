@@ -6,7 +6,14 @@ import {
   type User 
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { auth, db, isFirebaseAvailable } from '../config/firebase';
+
+// Helper function to check Firebase availability
+const checkFirebaseAvailability = () => {
+  if (!isFirebaseAvailable || !auth || !db) {
+    throw new Error('Firebase is not configured. Please configure Firebase environment variables to use authentication features.');
+  }
+};
 
 export interface UserData {
   uid: string;
@@ -18,8 +25,9 @@ export interface UserData {
 
 // Sign up with email and password
 export const signUp = async (email: string, password: string, name: string): Promise<UserData> => {
+  checkFirebaseAvailability();
   try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth!, email, password);
     const user = userCredential.user;
     
     // Create user document in Firestore
@@ -31,7 +39,7 @@ export const signUp = async (email: string, password: string, name: string): Pro
       updatedAt: new Date().toISOString()
     };
     
-    await setDoc(doc(db, 'users', user.uid), userData);
+    await setDoc(doc(db!, 'users', user.uid), userData);
     
     return userData;
   } catch (error: unknown) {
@@ -43,12 +51,13 @@ export const signUp = async (email: string, password: string, name: string): Pro
 
 // Sign in with email and password
 export const signIn = async (email: string, password: string): Promise<UserData> => {
+  checkFirebaseAvailability();
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth!, email, password);
     const user = userCredential.user;
     
     // Get user data from Firestore
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const userDoc = await getDoc(doc(db!, 'users', user.uid));
     if (!userDoc.exists()) {
       throw new Error('User data not found');
     }
@@ -63,6 +72,9 @@ export const signIn = async (email: string, password: string): Promise<UserData>
 
 // Sign out
 export const signOutUser = async (): Promise<void> => {
+  if (!isFirebaseAvailable || !auth) {
+    return; // Nothing to sign out from if Firebase isn't available
+  }
   try {
     await signOut(auth);
   } catch (error: unknown) {
@@ -74,10 +86,16 @@ export const signOutUser = async (): Promise<void> => {
 
 // Listen to auth state changes
 export const onAuthStateChange = (callback: (user: UserData | null) => void) => {
+  if (!isFirebaseAvailable || !auth || !db) {
+    // If Firebase not available, immediately call callback with null
+    callback(null);
+    // Return a no-op unsubscribe function
+    return () => {};
+  }
   return onAuthStateChanged(auth, async (user: User | null) => {
     if (user) {
       try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const userDoc = await getDoc(doc(db!, 'users', user.uid));
         if (userDoc.exists()) {
           callback(userDoc.data() as UserData);
         } else {
@@ -95,5 +113,8 @@ export const onAuthStateChange = (callback: (user: UserData | null) => void) => 
 
 // Get current user
 export const getCurrentUser = (): User | null => {
+  if (!isFirebaseAvailable || !auth) {
+    return null;
+  }
   return auth.currentUser;
 };

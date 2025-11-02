@@ -13,8 +13,15 @@ import {
   addDoc,
   serverTimestamp
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, isFirebaseAvailable } from '../config/firebase';
 import type { CVData } from '../types/cv.types';
+
+// Helper function to check Firebase availability
+const checkFirebaseAvailability = () => {
+  if (!isFirebaseAvailable || !db) {
+    throw new Error('Firebase is not configured. Please configure Firebase environment variables to use data persistence features.');
+  }
+};
 
 export interface ResumeDocument {
   id: string;
@@ -36,8 +43,9 @@ export const createResume = async (
   templateId: string, 
   data: CVData
 ): Promise<string> => {
+  checkFirebaseAvailability();
   try {
-    const resumeRef = await addDoc(collection(db, 'resumes'), {
+    const resumeRef = await addDoc(collection(db!, 'resumes'), {
       userId,
       title,
       templateId,
@@ -57,8 +65,9 @@ export const createResume = async (
 
 // Get resume by ID
 export const getResume = async (resumeId: string): Promise<ResumeDocument | null> => {
+  checkFirebaseAvailability();
   try {
-    const resumeRef = doc(db, 'resumes', resumeId);
+    const resumeRef = doc(db!, 'resumes', resumeId);
     const resumeSnap = await getDoc(resumeRef);
     
     if (resumeSnap.exists()) {
@@ -73,8 +82,9 @@ export const getResume = async (resumeId: string): Promise<ResumeDocument | null
 
 // Get all resumes for a user
 export const getUserResumes = async (userId: string): Promise<ResumeDocument[]> => {
+  checkFirebaseAvailability();
   try {
-    const resumesRef = collection(db, 'resumes');
+    const resumesRef = collection(db!, 'resumes');
     
     const q = query(
       resumesRef,
@@ -107,8 +117,9 @@ export const updateResume = async (
   resumeId: string, 
   updates: Partial<ResumeDocument>
 ): Promise<void> => {
+  checkFirebaseAvailability();
   try {
-    const resumeRef = doc(db, 'resumes', resumeId);
+    const resumeRef = doc(db!, 'resumes', resumeId);
     await updateDoc(resumeRef, {
       ...updates,
       updatedAt: serverTimestamp()
@@ -121,8 +132,9 @@ export const updateResume = async (
 
 // Delete resume
 export const deleteResume = async (resumeId: string): Promise<void> => {
+  checkFirebaseAvailability();
   try {
-    const resumeRef = doc(db, 'resumes', resumeId);
+    const resumeRef = doc(db!, 'resumes', resumeId);
     await deleteDoc(resumeRef);
   } catch (error) {
     console.error('Delete resume error:', error);
@@ -157,8 +169,9 @@ export const duplicateResume = async (
 
 // Get public resumes (for templates showcase)
 export const getPublicResumes = async (limitCount: number = 10): Promise<ResumeDocument[]> => {
+  checkFirebaseAvailability();
   try {
-    const resumesRef = collection(db, 'resumes');
+    const resumesRef = collection(db!, 'resumes');
     const q = query(
       resumesRef,
       where('isPublic', '==', true),
@@ -179,8 +192,9 @@ export const getPublicResumes = async (limitCount: number = 10): Promise<ResumeD
 
 // Increment download count
 export const incrementDownloadCount = async (resumeId: string): Promise<void> => {
+  checkFirebaseAvailability();
   try {
-    const resumeRef = doc(db, 'resumes', resumeId);
+    const resumeRef = doc(db!, 'resumes', resumeId);
     const resumeSnap = await getDoc(resumeRef);
     
     if (resumeSnap.exists()) {

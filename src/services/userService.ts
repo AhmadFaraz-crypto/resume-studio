@@ -5,8 +5,15 @@ import {
   setDoc, 
   updateDoc
 } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { db, isFirebaseAvailable } from '../config/firebase';
 import type { User } from 'firebase/auth';
+
+// Helper function to check Firebase availability
+const checkFirebaseAvailability = () => {
+  if (!isFirebaseAvailable || !db) {
+    throw new Error('Firebase is not configured. Please configure Firebase environment variables to use data persistence features.');
+  }
+};
 
 export interface UserProfile {
   uid: string;
@@ -21,7 +28,8 @@ export interface UserProfile {
 
 // Create or update user profile
 export const createUserProfile = async (user: User): Promise<UserProfile> => {
-  const userRef = doc(db, 'users', user.uid);
+  checkFirebaseAvailability();
+  const userRef = doc(db!, 'users', user.uid);
   const userSnap = await getDoc(userRef);
   
   const userData: UserProfile = {
@@ -41,7 +49,8 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
 
 // Get user profile
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
-  const userRef = doc(db, 'users', uid);
+  checkFirebaseAvailability();
+  const userRef = doc(db!, 'users', uid);
   const userSnap = await getDoc(userRef);
   
   if (userSnap.exists()) {
@@ -52,7 +61,8 @@ export const getUserProfile = async (uid: string): Promise<UserProfile | null> =
 
 // Update user profile
 export const updateUserProfile = async (uid: string, updates: Partial<UserProfile>): Promise<void> => {
-  const userRef = doc(db, 'users', uid);
+  checkFirebaseAvailability();
+  const userRef = doc(db!, 'users', uid);
   await updateDoc(userRef, {
     ...updates,
     updatedAt: new Date()
@@ -61,7 +71,8 @@ export const updateUserProfile = async (uid: string, updates: Partial<UserProfil
 
 // Update user's resume count
 export const updateUserResumeCount = async (uid: string, increment: number = 1): Promise<void> => {
-  const userRef = doc(db, 'users', uid);
+  checkFirebaseAvailability();
+  const userRef = doc(db!, 'users', uid);
   const userSnap = await getDoc(userRef);
   
   if (userSnap.exists()) {
