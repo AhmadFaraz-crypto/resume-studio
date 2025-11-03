@@ -29,19 +29,21 @@ A modern, open-source CV/Resume builder application built with React, TypeScript
 - Smooth transition from gallery to editor
 
 ### ✏️ Full Editing Capabilities
-- Edit personal information (name, email, phone, location, LinkedIn)
-- Add/edit/remove work experience entries
+- **Collapsible Editor Sections**: Organized collapsible sections for Personal Info, Work Experience, Education, and Skills
+- Edit personal information (name, email, phone, location, LinkedIn, professional summary)
+- Add/edit/remove work experience entries with job title suggestions
 - Add/edit/remove education entries
 - Manage skills (comma-separated list)
 - Real-time preview of changes
 - User dashboard with resume management
 - Save drafts and manage multiple resumes
+- **Performance Optimized**: Memoized components prevent unnecessary re-renders for smooth editing experience
 
-### 📥 Export Options
-- **PDF Export**: High-quality multi-page PDF generation with A4 standard dimensions
-- **DOCX Export**: Microsoft Word-compatible documents using docx library
-- **Page Break Preview**: Visual indicators show exactly where pages will break
+### 📥 Export & Import Options
+- **PDF Export**: High-quality PDF generation with A4 standard dimensions
+- **PDF Import**: Upload existing PDF resumes and extract data automatically
 - **WYSIWYG**: What You See Is What You Get - preview matches exported PDF exactly
+- Automatic data extraction from uploaded PDFs
 
 ### 🔐 Authentication & Data Persistence
 - Email/Password authentication
@@ -52,24 +54,27 @@ A modern, open-source CV/Resume builder application built with React, TypeScript
 
 ### 🎯 Modern UI/UX
 - Responsive design with Tailwind CSS
-- Toggle editor visibility for focused preview
-- Template selection with visual indicators
+- **Side-by-side Editor & Preview**: Edit on the left, see live preview on the right
+- Collapsible editor sections for organized editing
+- Template selection via URL (e.g., `/editor/1`, `/editor/2`)
 - Clean, professional interface
 - Toast notifications for user feedback
+- **Optimized Performance**: Components are memoized to prevent focus loss while typing
 
 ## 🛠️ Technologies Used
 
-- **React 19** - UI framework
+- **React 19** - UI framework with hooks and memoization
 - **TypeScript** - Type safety
-- **Vite** - Build tool and development server
+- **Vite 7** - Build tool and development server
 - **Tailwind CSS** - Utility-first CSS framework
 - **Firebase** - Authentication, Firestore, and Storage
-- **React Router** - Client-side routing
+- **React Router v7** - Client-side routing
 - **html2canvas** - HTML to canvas conversion for PDF
 - **jsPDF** - PDF generation
-- **docx** - DOCX file generation
+- **pdfjs-dist** - PDF parsing and data extraction
 - **file-saver** - File download functionality
 - **classnames** - Conditional class management
+- **React.memo** - Component memoization for performance optimization
 
 ## 📋 Prerequisites
 
@@ -169,57 +174,84 @@ npm run dev
 
 ### Browsing Templates
 
-1. When you first open the app, you'll see the **Template Gallery**
+1. When you first open the app, you'll see the **Template Gallery** (home page)
 2. Browse through visual previews of all available templates
-3. Click on any template card to select it
-4. Click "Start Editing Your CV" or "Edit This Template" to begin
+3. Click on any template card to start the wizard
+4. Or navigate to `/templates` to see all templates in a grid view
 
 ### Creating Your First Resume
 
-1. **Sign Up**: Create an account or sign in
-2. **Select Template**: Choose from 11 beautiful templates
-3. **Fill Information**: 
-   - Personal details
-   - Work experience
-   - Education
-   - Skills
-4. **Preview**: See your CV update in real-time
-5. **Export**: Download as PDF or DOCX
+#### Option 1: Resume Wizard (Step-by-Step)
+1. Select a template from the gallery or templates page
+2. Complete the **6-step wizard**:
+   - **Step 1**: Personal Information
+   - **Step 2**: Work Experience
+   - **Step 3**: Education
+   - **Step 4**: Skills
+   - **Step 5**: Professional Summary
+   - **Step 6**: Review (edit any section if needed)
+3. Click "Next" on the final step to go to the editor
+4. Your resume is automatically saved and opens in the editor
+
+#### Option 2: Direct Editor Access
+1. Navigate to `/editor/:templateId` (e.g., `/editor/1` for template 1)
+2. Start editing directly with collapsible sections
+
+#### Option 3: Upload Existing PDF
+1. Navigate to `/upload`
+2. Upload your existing PDF resume
+3. The app will extract your data automatically
+4. Edit and customize in the editor
 
 ### Editing Your CV
 
-- Toggle between editor and preview modes
-- Switch templates anytime
-- Save your progress automatically
-- Manage multiple resume drafts
+- **Collapsible Sections**: Click section headers to expand/collapse
+  - Personal Information
+  - Work Experience
+  - Education
+  - Skills
+- **Real-time Preview**: See changes instantly in the right panel
+- **Template Switching**: Change template by navigating to `/editor/:templateId` (e.g., `/editor/2`)
+- **Auto-save**: Your progress is automatically saved to localStorage
+- **Draft Management**: Access drafts from your dashboard when logged in
 
 ### Exporting Your CV
 
-1. Review your CV in the preview
-2. Page break indicators show where pages will split
-3. Click "Export PDF" for multi-page PDF (A4 format)
-4. Click "Export DOCX" for Word document
-5. Files are automatically named based on your name
+1. Review your CV in the preview panel
+2. Click "Export PDF" button in the header
+3. For authenticated users: PDF is saved to your dashboard
+4. For guests: You'll be prompted to sign in (draft is saved automatically)
+5. PDF files are automatically named based on your name (e.g., `John_Doe_CV.pdf`)
+6. PDF is exported in A4 format
 
 ## 📁 Project Structure
 
 ```
 src/
 ├── components/
-│   ├── common/           # Reusable UI components
-│   ├── dashboard/        # Dashboard components
-│   ├── layout/           # Layout components (Header, Footer, etc.)
-│   ├── templates/        # CV template components (11 templates)
-│   └── wizard/           # Resume creation wizard steps
+│   ├── common/           # Reusable UI components (Input, Button, Textarea, etc.)
+│   ├── dashboard/        # Dashboard components (ResumeCard, ResumeGrid, etc.)
+│   ├── layout/           # Layout components (Header, Footer, Hero, Features)
+│   ├── templates/        # CV template components (11 templates: CVTemplate.tsx - CVTemplate11.tsx)
+│   └── wizard/           # Resume creation wizard steps (6 steps)
 ├── config/
 │   └── firebase.ts       # Firebase configuration
-├── contexts/             # React contexts (Error handling, etc.)
-├── data/                 # Default data and templates
-├── hooks/                # Custom React hooks
+├── contexts/             # React contexts (Error handling with Toast notifications)
+├── data/                 # Default data, templates config, and dummy data
+├── hooks/                # Custom React hooks (useCVData, useSelectedTemplate, useErrorHandler)
 ├── pages/                # Page components
-├── services/             # Firebase services (auth, storage, etc.)
-├── types/                # TypeScript type definitions
-└── utils/                # Utility functions (PDF export, etc.)
+│   ├── GalleryPage.tsx   # Home page with template carousel
+│   ├── EditorPage.tsx    # Main editor with collapsible sections
+│   ├── ResumeWizard.tsx  # 6-step wizard for creating resume
+│   ├── DashboardPage.tsx # User dashboard for managing resumes
+│   ├── TemplatesPage.tsx # Template gallery page
+│   ├── ResumeUploadPage.tsx # PDF upload and extraction
+│   ├── PricingPage.tsx   # Pricing plans
+│   ├── LoginPage.tsx     # Authentication
+│   └── SignupPage.tsx    # User registration
+├── services/             # Firebase services (auth, storage, resume, draft)
+├── types/                # TypeScript type definitions (CVData, WorkExperience, etc.)
+└── utils/                # Utility functions (PDF export, template renderer, AI service)
 ```
 
 ## 🧪 Available Scripts
@@ -238,12 +270,24 @@ All environment variables are prefixed with `VITE_` (required by Vite). See `env
 - Firebase configuration (required)
 - File upload settings
 - Firebase emulator settings (optional, for local development)
+- AI service integration (optional)
 
 ### Customization
 
-- **Templates**: Add new templates in `src/components/templates/`
+- **Templates**: Add new templates in `src/components/templates/` (CVTemplate.tsx pattern)
 - **Default Data**: Modify `src/data/defaultCV.ts`
 - **Accent Colors**: Edit template definitions in `src/data/templates.ts`
+- **Routes**: Update routes in `src/App.tsx`
+- **Performance**: Components are memoized using `React.memo` and `useCallback` for optimal performance
+
+### Performance Optimizations
+
+The application includes several performance optimizations:
+
+- **Memoized Components**: Input, Textarea, Date, and CollapsibleSection components use `React.memo`
+- **Stable Function References**: Event handlers use `useCallback` to prevent unnecessary re-renders
+- **Optimized Re-renders**: Components only re-render when their props actually change
+- **Local Storage Caching**: CV data and selected templates are cached in localStorage
 
 ## 🚀 Deployment
 
