@@ -158,6 +158,12 @@ const EditorPage: FC = () => {
     try {
       updateSelectedTemplate(templateId);
       setIsTemplateModalOpen(false);
+      // Navigate to the new template URL
+      if (resumeId) {
+        navigate(`/editor/${templateId}?resumeId=${resumeId}`);
+      } else {
+        navigate(`/editor/${templateId}`);
+      }
     } catch (error) {
       handleResumeError(error);
     }

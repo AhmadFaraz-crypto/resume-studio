@@ -5,10 +5,9 @@ import type { CVData } from '../../types/cv.types';
 interface ReviewStepProps {
   data: CVData;
   onEdit: (step: string) => void;
-  onComplete: () => void;
 }
 
-const ReviewStep: React.FC<ReviewStepProps> = ({ data, onEdit, onComplete }) => {
+const ReviewStep: React.FC<ReviewStepProps> = ({ data, onEdit }) => {
   const { personalInfo, workExperience, education, skills } = data;
 
   return (
@@ -152,12 +151,6 @@ const ReviewStep: React.FC<ReviewStepProps> = ({ data, onEdit, onComplete }) => 
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex justify-center gap-4 pt-6">
-        <Button onClick={onComplete} className="px-8 py-3">
-          Continue to Template Selection
-        </Button>
-      </div>
     </div>
   );
 };

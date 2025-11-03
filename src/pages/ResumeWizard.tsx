@@ -208,7 +208,6 @@ const ResumeWizard: React.FC = () => {
             <ReviewStep
               data={wizardData}
               onEdit={handleEdit}
-              onComplete={handleComplete}
             />
           </WizardStep>
         </div>

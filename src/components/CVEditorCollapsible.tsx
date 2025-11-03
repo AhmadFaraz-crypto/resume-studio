@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import type { FC, ChangeEvent } from 'react';
+import { useState, useCallback, memo } from 'react';
+import type { FC, ChangeEvent, ReactNode } from 'react';
 import type { CVData, WorkExperience, Education } from '../types/cv.types';
 import { Button, Input, Textarea, Date, JobTitleDropdown } from './common';
 
@@ -7,6 +7,54 @@ interface CVEditorCollapsibleProps {
   data: CVData;
   onChange: (data: CVData) => void;
 }
+
+interface CollapsibleSectionProps {
+  title: string;
+  icon: ReactNode;
+  iconColor: string;
+  children: ReactNode;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+const CollapsibleSection: FC<CollapsibleSectionProps> = memo(({ 
+  title, 
+  icon, 
+  iconColor, 
+  children, 
+  isExpanded, 
+  onToggle 
+}) => (
+  <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+    <button
+      onClick={onToggle}
+      className="w-full p-6 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all duration-200 flex items-center justify-between"
+    >
+      <div className="flex items-center">
+        <div className={`w-10 h-10 ${iconColor} rounded-full flex items-center justify-center mr-4`}>
+          {icon}
+        </div>
+        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+      </div>
+      <svg
+        className={`w-6 h-6 text-gray-500 transition-transform duration-200 ${
+          isExpanded ? 'rotate-180' : ''
+        }`}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    
+    {isExpanded && (
+      <div className="p-6 border-t border-gray-100">
+        {children}
+      </div>
+    )}
+  </div>
+));
 
 const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) => {
   const [expandedSections, setExpandedSections] = useState({
@@ -17,12 +65,12 @@ const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) =
   });
   const [counter, setCounter] = useState(0);
 
-  const toggleSection = (section: keyof typeof expandedSections) => {
+  const toggleSection = useCallback((section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
-  };
+  }, []);
 
   const handlePersonalInfoChange = (field: string, value: string) => {
     onChange({
@@ -145,52 +193,10 @@ const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) =
     });
   };
 
-
-  const CollapsibleSection = ({ 
-    title, 
-    icon, 
-    iconColor, 
-    children, 
-    isExpanded, 
-    onToggle 
-  }: {
-    title: string;
-    icon: React.ReactNode;
-    iconColor: string;
-    children: React.ReactNode;
-    isExpanded: boolean;
-    onToggle: () => void;
-  }) => (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-      <button
-        onClick={onToggle}
-        className="w-full p-6 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 transition-all duration-200 flex items-center justify-between"
-      >
-        <div className="flex items-center">
-          <div className={`w-10 h-10 ${iconColor} rounded-full flex items-center justify-center mr-4`}>
-            {icon}
-          </div>
-          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
-        </div>
-        <svg
-          className={`w-6 h-6 text-gray-500 transition-transform duration-200 ${
-            isExpanded ? 'rotate-180' : ''
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-      
-      {isExpanded && (
-        <div className="p-6 border-t border-gray-100">
-          {children}
-        </div>
-      )}
-    </div>
-  );
+  const togglePersonal = useCallback(() => toggleSection('personal'), [toggleSection]);
+  const toggleWork = useCallback(() => toggleSection('work'), [toggleSection]);
+  const toggleEducation = useCallback(() => toggleSection('education'), [toggleSection]);
+  const toggleSkills = useCallback(() => toggleSection('skills'), [toggleSection]);
 
   return (
     <div className="space-y-6">
@@ -221,7 +227,7 @@ const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) =
           </svg>
         }
         isExpanded={expandedSections.personal}
-        onToggle={() => toggleSection('personal')}
+        onToggle={togglePersonal}
       >
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -290,7 +296,7 @@ const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) =
           </svg>
         }
         isExpanded={expandedSections.work}
-        onToggle={() => toggleSection('work')}
+        onToggle={toggleWork}
       >
         <div className="space-y-6">
           <div className="flex justify-between items-center">
@@ -389,7 +395,7 @@ const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) =
           </svg>
         }
         isExpanded={expandedSections.education}
-        onToggle={() => toggleSection('education')}
+        onToggle={toggleEducation}
       >
         <div className="space-y-6">
           <div className="flex justify-between items-center">
@@ -463,7 +469,7 @@ const CVEditorCollapsible: FC<CVEditorCollapsibleProps> = ({ data, onChange }) =
           </svg>
         }
         isExpanded={expandedSections.skills}
-        onToggle={() => toggleSection('skills')}
+        onToggle={toggleSkills}
       >
         <div className="space-y-6">
           <p className="text-gray-600">List your technical and soft skills</p>
